@@ -97,7 +97,7 @@
                 fillOpacity: 0.5,
                 radius: 200
             });
-
+            const hour = 38
             async function onMapClick(e) {
                 if (marker1) {
                     map.removeLayer(marker1);
@@ -109,63 +109,22 @@
                 marker1.addTo(map);
                 circle1.setLatLng([lat,lon])
                 circle1.addTo(map);
-                const hour = 38
-                const weatherData = await getweather(lat, lon);
-                if (weatherData === 0) {
-                    marker.bindPopup(`lỗi khi lấy thông tin`).openPopup();
-                    return;
-                }
-                const humid = ((weatherData.json.hourly.relative_humidity_2m[hour])*0.45);
-                const slope = (weatherData.slope).toFixed(2);
-                let rainfall = ((weatherData.json.hourly.rain[hour]) ? weatherData.json.hourly.rain[hour] : 0);
-                const wind = Math.round(weatherData.json.hourly.wind_speed_10m[hour]);
-                const soil = weatherData.soiltype.wrb_class_name;
-                const city = 0
-                const population = await getHumanData(city);
-                const a = getslopeFactor(slope);
-                const b = getrainFactor(rainfall);
-                const c = getwindFactor(wind);
-                const d = getsoilFactor(soil);
-                const g = getsoilmoistureFactor(humid);
-                const hazard = calculatehazard(a,b,c,d,g);
-                const weatherContent = `
-                    <b>Nhiệt độ:</b> ${weatherData.json.hourly.temperature_120m[hour]} <br>
-                    <b>Độ ẩm đất:</b> `+ Math.round(humid)+ `%<br>
-                    <b>Tốc độ gió:</b> `+ wind + `km/h<br>
-                    <b>độ dốc:</b> `+ slope + `°<br>
-                    <b>loại đất:</b> `+ soil + `<br>
-                    <b>lượng mưa:</b> `+ rainfall + `mm/h<br>
-                    <b>mật độ dân số:</b> `+ population + ` người<br>
-                    <b><span class = "danger">NGUY CƠ:</span></b> `+ hazard + `%<br>
-                    <b>ngày: ${weatherData.end_date} ${hour - 24}h`;
-                if (hazard >= 70) {
-                    marker1.bindPopup(`<b><span class="danger">VÙNG NGUY HIỂM.</span></b><br>`+weatherContent).openPopup();
-                } else if (hazard >= 55 && hazard < 70) {
-                    marker1.bindPopup(`<b><span class="might">Vùng Có Nguy Cơ.</span></b><br>`+weatherContent).openPopup();
-                } else {
-                    marker1.bindPopup(`<b><span class="safe">Vùng An Toàn.</span></b><br>`+weatherContent).openPopup();
-                }
+                getweatherbylatlon(lat,lon,hour);
             }
             try{map.on('click', onMapClick)}
             catch (error) {
                 console.error('Lỗi khi lấy dữ liệu:', error.message);
             };
-            async function getweatherbylatlon() {
-                if (marker1) {
-                    map.removeLayer(marker1);
-                    map.removeLayer(circle1);
-                }
-                const lat = Number(document.getElementById("latitude1").value);
-                const lon = Number(document.getElementById("longitude1").value);
-                map.setView([lat,lon],13);
+            async function getweatherbylatlon(lat,lon,hour) {
+                document.getElementById("ways-container").innerHTML = '';
+                map.setView([lat,lon],13)
                 marker1.setLatLng([lat,lon]);
                 marker1.addTo(map);
-                circle1.setLatLng([lat,lon]);
+                circle1.setLatLng([lat,lon])
                 circle1.addTo(map);
-                const hour = 38
-                const weatherData = await getweather(lat,lon);
+                const weatherData = await getweather(lat, lon);
                 if (weatherData === 0) {
-                    marker.bindPopup(`lỗi khi lấy thông tin`).openPopup();
+                    marker.bindPopup(`Lỗi khi lấy thông tin`).openPopup();
                     return;
                 }
                 const humid = ((weatherData.json.hourly.relative_humidity_2m[hour])*0.45);
@@ -209,7 +168,7 @@
         Vĩ độ : <span id ='longitude'></span></br>
         latitude: <input type="text" id="latitude1" placeholder="Hãy Điền Vào Kinh Độ">
         longitude: <input type="text" id="longitude1" placeholder="Hãy Điền Vào Vĩ Độ">
-        <button onclick="getweatherbylatlon()">Tìm</button>
+        <button onclick="getweatherbylatlon(Number(document.getElementById('latitude1').value),Number(document.getElementById('longitude1').value),hour)">Tìm</button>
     </p>
 </body>
 </html>
