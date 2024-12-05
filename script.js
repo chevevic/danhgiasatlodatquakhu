@@ -23,13 +23,38 @@ async function getweather(lat,lon) {
   .then(data => {
     console.log(data);
   })
+    const url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${start_date}&endtime=${end_date}`;
+    const response4 = await fetch(url);
+    const seismicData = await response4.json();
+    console.log(seismicData);
+    let totalImpact = 0;
+    let count = 0;
+    if (seismicData.features && Array.isArray(seismicData.features)) {
+        seismicData.features.forEach(earthquake => {
+            const magnitude = earthquake.properties.mag;
+            const earthquakeLat = earthquake.geometry.coordinates[1];
+            const earthquakeLon = earthquake.geometry.coordinates[0];
+            const distance1 = getDistance(lat, lon, earthquakeLat, earthquakeLon);
+            const impact = magnitude / (1 + distance1);
+    
+            totalImpact += impact;
+            count++;
+        });
+    } else {
+        console.error("Dữ liệu động đất không hợp lệ hoặc không có dữ liệu features.");
+    }
+    
+    const Impact = count > 0 ? totalImpact : 0;
+    
+    console.log(`Tổng Mức độ ảnh hưởng từ các trận động đất trong khu vực: ${Impact.toFixed(2)}`);
     console.log(elevationData)
     return {
         json,
         slope,
         soiltype,
         start_date,
-        end_date
+        end_date,
+        Impact
     };
     } catch (error) {
         console.error("An error occurred:", error);
