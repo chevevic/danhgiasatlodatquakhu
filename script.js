@@ -111,7 +111,6 @@ function getDistance(lat1, lon1, lat2, lon2) {
               Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
-    console.log(`Distance: ${distance} meters`);
     return R * c;
 }
 function calculatehazard(slope,rain,soil,humid,wind) {
