@@ -52,6 +52,7 @@
                 const soil = weatherData.soiltype.wrb_class_name;
                 const city = 0
                 const population = await getHumanData(city);
+                const seismic = weatherData.Impact.toFixed(3);
                 const a = getslopeFactor(slope);
                 const b = getrainFactor(rainfall);
                 const c = getwindFactor(wind);
@@ -65,6 +66,7 @@
                     <b>độ dốc:</b> `+ slope + `°<br>
                     <b>loại đất:</b> `+ soil + `<br>
                     <b>lượng mưa:</b> `+ rainfall + `mm/h<br>
+                    <b>Độ ảnh hưởng động đất</b> ` + seismic +` Mw/m<br>
                     <b>mật độ dân số:</b> `+ population + ` người<br>
                     <b><span class = "danger">NGUY CƠ:</span></b> `+ hazard + `%<br>
                     <b>ngày:</b> ${weatherData.end_date} ${hour - 24}h`;
@@ -138,6 +140,7 @@
                 const b = getrainFactor(rainfall);
                 const c = getwindFactor(wind);
                 const d = getsoilFactor(soil);
+                const seismic = weatherData.Impact.toFixed(3);
                 const g = getsoilmoistureFactor(humid);
                 const hazard = calculatehazard(a,b,c,d,g);
                 const weatherContent = `
@@ -147,6 +150,7 @@
                     <b>độ dốc:</b> `+ slope + `°<br>
                     <b>loại đất:</b> `+ soil + `<br>
                     <b>lượng mưa:</b> `+ rainfall + `mm/h<br>
+                    <b>Độ ảnh hưởng động đất</b> ` + seismic +` Mw/m<br>
                     <b>mật độ dân số:</b> `+ population + ` người<br>
                     <b><span class = "danger">NGUY CƠ:</span></b> `+ hazard + `%<br>
                     <b>ngày: ${weatherData.end_date} ${hour - 24}h`;
