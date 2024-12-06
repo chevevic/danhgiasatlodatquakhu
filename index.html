@@ -118,7 +118,6 @@
                 console.error('Lỗi khi lấy dữ liệu:', error.message);
             };
             async function getweatherbylatlon(lat,lon,hour) {
-                document.getElementById("ways-container").innerHTML = '';
                 map.setView([lat,lon],13)
                 marker1.setLatLng([lat,lon]);
                 marker1.addTo(map);
