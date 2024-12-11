@@ -2,16 +2,21 @@ async function getweather(lat,lon) {
     const end_date = '2024-09-07';
     const start_date = '2024-09-06';
     try {
-    const api_url = `https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&start_date=${start_date}&end_date=${end_date}&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,precipitation,rain,wind_speed_10m,temperature_120m,soil_moisture_27_to_81cm&timezone=Asia%2FBangkok`;
-    const api_url1 =  `https://api.open-elevation.com/api/v1/lookup?locations=${lat - 0.0004},${lon - 0.0004}|${lat + 0.0004},${lon + 0.0004}`;
+    const api_url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=5ecd55a45b022c71aede9450aaffb59d`;
+    const api_url11 =  `https://api.open-meteo.com/v1/elevation?latitude=${lat - 0.0004}&longitude=${lon - 0.0004}`;
+    const api_url12 =  `https://api.open-meteo.com/v1/elevation?latitude=${lat + 0.0004}&longitude=${lon + 0.0004}`;
     const api_url2 =`https://rest.isric.org/soilgrids/v2.0/classification/query?lon=${lon}&lat=${lat}&number_classes=12`
     const response = await fetch(api_url);
     const json = await response.json();
     console.log(json);
-    const response1 = await fetch(api_url1);
-    const elevationData = await response1.json();
-    const elevation1 = elevationData.results[0].elevation;
-    const elevation2 = elevationData.results[1].elevation;
+    const response11 = await fetch(api_url11);
+    const response12 = await fetch(api_url12);
+    const elevationData1 = await response11.json();
+    const elevationData2 = await response12.json();
+    console.log(elevationData1);
+    console.log(elevationData2);
+    const elevation1 = elevationData1.elevation[0];
+    const elevation2 = elevationData2.elevation[0];
     const distance = getDistance(lat - 0.0004, lon - 0.0004, lat + 0.0004, lon + 0.0004);
     const slope = Math.atan((Math.abs(elevation2 - elevation1)) / distance)*(180 / Math.PI);
     console.log(`Slope: ${slope} °`);
