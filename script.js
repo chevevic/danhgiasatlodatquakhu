@@ -52,7 +52,6 @@ async function getweather(lat,lon) {
     const Impact = count > 0 ? totalImpact : 0;
     
     console.log(`Tổng Mức độ ảnh hưởng từ các trận động đất trong khu vực: ${Impact.toFixed(2)}`);
-    console.log(elevationData)
     return {
         json,
         slope,
