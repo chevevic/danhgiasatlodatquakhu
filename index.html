@@ -54,7 +54,7 @@
                 document.getElementById("longitude").textContent = lon;
                 const marker = L.marker([ lat,lon ]).addTo(map);
                 marker.setLatLng([lat,lon]);
-                const hour = 38
+                const hour = 33;
                 const weatherData = await getweather(lat, lon);
                 if (weatherData === 0) {
                     marker.bindPopup(`lỗi khi lấy thông tin`).openPopup();
@@ -126,7 +126,7 @@
                 marker1.addTo(map);
                 circle1.setLatLng([lat,lon])
                 circle1.addTo(map);
-                const hour = 38
+                const hour = 33;
                 const weatherData = await getweather(lat, lon);
                 if (weatherData === 0) {
                     marker.bindPopup(`lỗi khi lấy thông tin`).openPopup();
@@ -181,7 +181,7 @@
                 marker1.addTo(map);
                 circle1.setLatLng([lat,lon]);
                 circle1.addTo(map);
-                const hour = 38
+                const hour = 33;
                 const weatherData = await getweather(lat,lon);
                 if (weatherData === 0) {
                     marker.bindPopup(`lỗi khi lấy thông tin`).openPopup();
