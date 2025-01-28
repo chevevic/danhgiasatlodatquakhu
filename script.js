@@ -1,22 +1,17 @@
 async function getweather(lat,lon) {
-    const end_date = '2024-09-07';
-    const start_date = '2024-09-06';
+    const end_date = '2024-09-08';
+    const start_date = '2024-09-07';
     try {
     const api_url = `https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&start_date=${start_date}&end_date=${end_date}&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,precipitation,rain,wind_speed_10m,temperature_120m,soil_moisture_27_to_81cm&timezone=Asia%2FBangkok`;
-    const api_url11 =  `https://api.open-meteo.com/v1/elevation?latitude=${lat - 0.0004}&longitude=${lon - 0.0004}`;
-    const api_url12 =  `https://api.open-meteo.com/v1/elevation?latitude=${lat + 0.0004}&longitude=${lon + 0.0004}`;
+    const api_url1 =  `https://api.open-elevation.com/api/v1/lookup?locations=${lat - 0.0004},${lon - 0.0004}|${lat + 0.0004},${lon + 0.0004}`;
     const api_url2 =`https://rest.isric.org/soilgrids/v2.0/classification/query?lon=${lon}&lat=${lat}&number_classes=12`
     const response = await fetch(api_url);
     const json = await response.json();
     console.log(json);
-    const response11 = await fetch(api_url11);
-    const response12 = await fetch(api_url12);
-    const elevationData1 = await response11.json();
-    const elevationData2 = await response12.json();
-    console.log(elevationData1);
-    console.log(elevationData2);
-    const elevation1 = elevationData1.elevation[0];
-    const elevation2 = elevationData2.elevation[0];
+    const response1 = await fetch(api_url1);
+    const elevationData = await response1.json();
+    const elevation1 = elevationData.results[0].elevation;
+    const elevation2 = elevationData.results[1].elevation;
     const distance = getDistance(lat - 0.0004, lon - 0.0004, lat + 0.0004, lon + 0.0004);
     const slope = Math.atan((Math.abs(elevation2 - elevation1)) / distance)*(180 / Math.PI);
     console.log(`Slope: ${slope} °`);
@@ -28,37 +23,13 @@ async function getweather(lat,lon) {
   .then(data => {
     console.log(data);
   })
-    const url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${start_date}&endtime=${end_date}`;
-    const response4 = await fetch(url);
-    const seismicData = await response4.json();
-    console.log(seismicData);
-    let totalImpact = 0;
-    let count = 0;
-    if (seismicData.features && Array.isArray(seismicData.features)) {
-        seismicData.features.forEach(earthquake => {
-            const magnitude = earthquake.properties.mag;
-            const earthquakeLat = earthquake.geometry.coordinates[1];
-            const earthquakeLon = earthquake.geometry.coordinates[0];
-            const distance1 = getDistance(lat, lon, earthquakeLat, earthquakeLon);
-            const impact = magnitude / (1 + distance1);
-    
-            totalImpact += impact;
-            count++;
-        });
-    } else {
-        console.error("Dữ liệu động đất không hợp lệ hoặc không có dữ liệu features.");
-    }
-    
-    const Impact = count > 0 ? totalImpact : 0;
-    
-    console.log(`Tổng Mức độ ảnh hưởng từ các trận động đất trong khu vực: ${Impact.toFixed(2)}`);
+    console.log(elevationData)
     return {
         json,
         slope,
         soiltype,
         start_date,
-        end_date,
-        Impact
+        end_date
     };
     } catch (error) {
         console.error("An error occurred:", error);
@@ -140,46 +111,46 @@ function getDistance(lat1, lon1, lat2, lon2) {
               Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
+    console.log(`Distance: ${distance} meters`);
     return R * c;
 }
-function calculatehazard(slope,rain,soil,humid,wind) {
-    hazard = (((slope * (rain + soil + humid + wind)) / (2*(2+2+2+2))) * 100).toFixed(0);
+function calculatehazard(slope,rain,soil,elevation,wind) {
+    hazard = ((slope*0.17 + elevation*0.36 + soil*0.055 + rain*0.36 + wind*0.055 )).toFixed(3);
     return hazard
 }
+function getelevationFactor(elevation) {
+    if (elevation < 500) return 1;
+    if (elevation >= 500 && elevation < 1000) return 2;
+    if (elevation >= 1000 && elevation < 1500) return 3;
+    return 4;
+}
 function getslopeFactor(slope) {
-    if (slope <= 0.5) return 0
-    if (slope >0.5 && slope < 1) return 0.05;
-    if (slope >= 1 && slope < 3) return 0.2;
-    if (slope >= 3 && slope < 10) return 0.5;
-    if (slope >= 10 && slope < 15) return 1;
-    if (slope >= 15 && slope <= 25) return 1.5;
-    if (slope > 25 && slope <= 35) return 1.75; 
-    return 2.0;
+    if (slope <= 8) return 1;
+    if (slope > 8 && slope < 15) return 2;
+    if (slope >= 15 && slope < 20) return 3;
+    if (slope >= 20 && slope < 25) return 4;
+    return 5;
 }
 function getrainFactor(rainfall) {
-    if (rainfall < 0.1 ) return 0.05;
-    if (rainfall >=0.4 && rainfall < 1.2) return 0.25;
-    if (rainfall >= 1.2 && rainfall < 2.2) return 0.5;
-    if (rainfall >= 2.2 && rainfall < 5) return 1.0;
-    if (rainfall >= 5 && rainfall <10) return 1.5;
-    return 2.0;
+    if (rainfall < 4 ) return 1;
+    if (rainfall >= 4 && rainfall < 10) return 2;
+    return 3;
 }
-
 function getsoilFactor(soil) {
-    if (soil === "arenosols" || soil === "histosols") return 2.0;
-    if (soil === "Vertisols" || soil === "Gleysols") return 1.5;
-    if (soil === "Cambisols" || soil === "Acrisols") return 1.2;
-    if (soil === "Fluvisols" || soil === "Andosols" || soil === "phaeozems" ) return 0.8;
-    if (soil === "Luvisols" || soil === "Ferralsols" )  return 0.4;
-    return 0.2;
+    if (soil === "arenosols" || soil === "histosols") return 3;
+    if (soil === "Vertisols" || soil === "Gleysols") return 3;
+    if (soil === "Cambisols" || soil === "Acrisols") return 2;
+    if (soil === "Fluvisols" || soil === "Andosols" || soil === "phaeozems" ) return 2;
+    if (soil === "Luvisols" || soil === "Ferralsols" )  return 1;
+    return 1;
 }
 
 function getwindFactor(wind) {
-    if (wind < 12) return 0.1;
-    if (wind >= 12 && wind < 20) return 0.5;
-    if (wind >= 20 && wind < 30) return 1.0;
-    if (wind >= 30 && wind <= 40) return 1.5; 
-    return 2.0;
+    if (wind < 12) return 1;
+    if (wind >= 12 && wind < 20) return 2;
+    if (wind >= 20 && wind < 30) return 3;
+    if (wind >= 30 && wind <= 40) return 4; 
+    return 5;
 }
 
 function getsoilmoistureFactor(humid) {
