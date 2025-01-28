@@ -21,9 +21,3 @@
     font-weight: bold;
     font-size: 14;
 }
-#Map {
-    pointer-events: auto; /* Ban đầu cho phép thao tác */
-  }
-  .disabled {
-    pointer-events: none; /* Vô hiệu hóa thao tác người dùng */
-  }
